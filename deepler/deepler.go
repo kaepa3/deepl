@@ -22,12 +22,26 @@ type Deepler struct {
 	token      string
 }
 
-func NewDeepler(token string) *Deepler {
+func getSourceLang(sLang string) string {
+	if sLang == "" {
+		return "EN"
+	}
+	return sLang
+}
+
+func getTargetLang(tLang string) string {
+	if tLang == "" {
+		return "Ja"
+	}
+	return tLang
+}
+
+func NewDeepler(token string, sLang string, tLang string) *Deepler {
 	url := "https://api-free.deepl.com/v2/translate"
 	d := Deepler{
 		url:        url,
-		sourceLang: "EN",
-		targetLang: "Ja",
+		sourceLang: getSourceLang(sLang),
+		targetLang: getTargetLang(tLang),
 		token:      token,
 	}
 	return &d

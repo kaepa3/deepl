@@ -40,7 +40,10 @@ func main() {
 		return
 	}
 	readConfig()
-	d := deepler.NewDeepler(os.Getenv("DEEPL_TOKEN"))
+	token := os.Getenv("DEEPL_TOKEN")
+	sLang := os.Getenv("SOURCE_LANG")
+	tLang := os.Getenv("TARGET_LANG")
+	d := deepler.NewDeepler(token, sLang, tLang)
 	if text, err := d.Translate(strings.Join(text, ",")); err != nil {
 		fmt.Println(err)
 	} else {
