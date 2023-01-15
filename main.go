@@ -51,25 +51,6 @@ type Translated struct {
 	Text                  string `json:"text"`
 }
 
-func next(token string) error {
-	u := "https://api-free.deepl.com/v2/translate"
-	params := url.Values{}
-	params.Add("auth_key", token)
-	params.Add("source_lang", "EN")
-	params.Add("target_lang", "Ja")
-	params.Add("text", "Hello")
-	resp, err := http.PostForm(u, params)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	decoder := json.NewDecoder(resp.Body)
-	var respData DeepLResponse
-	decoder.Decode(&respData)
-	fmt.Printf("resp:%v", respData)
-	return nil
-}
-
 type Deepler struct {
 	url        string
 	sourceLang string
