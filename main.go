@@ -34,8 +34,11 @@ func readConfig() {
 
 func main() {
 	readConfig()
-	if err := next(os.Getenv("DEEPL_TOKEN")); err != nil {
+	d := NewDeepler(os.Getenv("DEEPL_TOKEN"))
+	if text, err := d.Translate("Hello"); err != nil {
 		fmt.Println(err)
+	} else {
+		fmt.Println(text)
 	}
 }
 
@@ -65,4 +68,39 @@ func next(token string) error {
 	decoder.Decode(&respData)
 	fmt.Printf("resp:%v", respData)
 	return nil
+}
+
+type Deepler struct {
+	url        string
+	sourceLang string
+	targetLang string
+	token      string
+}
+
+func NewDeepler(token string) *Deepler {
+	url := "https://api-free.deepl.com/v2/translate"
+	d := Deepler{
+		url:        url,
+		sourceLang: "EN",
+		targetLang: "Ja",
+		token:      token,
+	}
+	return &d
+}
+
+func (d *Deepler) Translate(text string) (string, error) {
+	params := url.Values{}
+	params.Add("auth_key", d.token)
+	params.Add("source_lang", d.sourceLang)
+	params.Add("target_lang", d.targetLang)
+	params.Add("text", text)
+	resp, err := http.PostForm(d.url, params)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	decoder := json.NewDecoder(resp.Body)
+	var respData DeepLResponse
+	decoder.Decode(&respData)
+	return respData.Translations[0].Text, nil
 }
