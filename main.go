@@ -1,15 +1,15 @@
 package main
 
 import (
-	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
-	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/joho/godotenv"
+	"github.com/kaepa3/deepl/deepler"
 )
 
 const (
@@ -33,55 +33,17 @@ func readConfig() {
 }
 
 func main() {
+	flag.Parse()
+	text := flag.Args()
+	if len(text) == 0 {
+		fmt.Println("error", text)
+		return
+	}
 	readConfig()
-	d := NewDeepler(os.Getenv("DEEPL_TOKEN"))
-	if text, err := d.Translate("Hello"); err != nil {
+	d := deepler.NewDeepler(os.Getenv("DEEPL_TOKEN"))
+	if text, err := d.Translate(strings.Join(text, ",")); err != nil {
 		fmt.Println(err)
 	} else {
 		fmt.Println(text)
 	}
-}
-
-type DeepLResponse struct {
-	Translations []Translated
-}
-
-type Translated struct {
-	DetectedSourceLaguage string `json:"detected_source_language"`
-	Text                  string `json:"text"`
-}
-
-type Deepler struct {
-	url        string
-	sourceLang string
-	targetLang string
-	token      string
-}
-
-func NewDeepler(token string) *Deepler {
-	url := "https://api-free.deepl.com/v2/translate"
-	d := Deepler{
-		url:        url,
-		sourceLang: "EN",
-		targetLang: "Ja",
-		token:      token,
-	}
-	return &d
-}
-
-func (d *Deepler) Translate(text string) (string, error) {
-	params := url.Values{}
-	params.Add("auth_key", d.token)
-	params.Add("source_lang", d.sourceLang)
-	params.Add("target_lang", d.targetLang)
-	params.Add("text", text)
-	resp, err := http.PostForm(d.url, params)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	decoder := json.NewDecoder(resp.Body)
-	var respData DeepLResponse
-	decoder.Decode(&respData)
-	return respData.Translations[0].Text, nil
 }
