@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	confFile = "deepl"
+	confFile = ".deepl"
 )
 
 func readConfig() {
